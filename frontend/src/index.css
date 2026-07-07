@@ -1,0 +1,292 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  background: #0b1220;
+}
+
+.book-inner:hover {
+  transform: rotateY(-10deg) rotateX(2deg);
+}
+
+/* ====== 3D BOOK: closed -> open ====== */
+.book-scene{
+  perspective: 1400px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.book-wrap{
+  position: relative;
+  width: min(880px, 95vw);
+  height: min(520px, 70vh);
+  transform-style: preserve-3d;
+}
+
+/* Couverture = un "panneau" qui pivote comme un livre */
+.book-cover{
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #7a4a18, #3b240d);
+  box-shadow: 0 30px 60px rgba(0,0,0,.45);
+  transform-style: preserve-3d;
+
+  /* pivot sur la tranche gauche */
+  transform-origin: left center;
+
+  transition: transform 900ms cubic-bezier(.2,.8,.2,1), box-shadow 900ms, opacity 900ms;
+  opacity: 1;
+}
+
+/* Pages (contenu interne) */
+.book-pages{
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: #f7f0e3;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0,0,0,.35);
+  transform: translateZ(-1px); /* juste derrière la couverture */
+  pointer-events: auto;
+}
+
+.pages-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+}
+
+.page{
+  padding: 42px;
+  pointer-events: auto;
+}
+
+.page.left{
+  border-right: 1px solid rgba(0,0,0,.08);
+}
+
+.spine{
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 100%;
+  background: #d7c3a1;
+  box-shadow: inset 0 0 8px rgba(0,0,0,.2);
+}
+
+/* Contenu couverture */
+.cover-content{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px;
+  color: #fff;
+}
+
+.cover-badge{
+  display: inline-block;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.15);
+  margin-bottom: 18px;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.cover-title{
+  font-size: 52px;
+  line-height: 1;
+  margin: 0;
+  font-weight: 800;
+}
+
+.cover-subtitle{
+  margin-top: 12px;
+  font-size: 18px;
+  opacity: .9;
+}
+
+.cover-hint{
+  margin-top: 26px;
+  font-size: 13px;
+  opacity: .85;
+}
+
+/* ÉTAT FERMÉ : on ne montre que la couverture */
+.book-wrap.closed .book-cover{
+  transform: rotateY(0deg) translateZ(2px);
+}
+.book-wrap.closed .book-pages{
+  filter: blur(1px);
+  opacity: .25;
+}
+
+/* ÉTAT OUVERT : la couverture pivote et révèle les pages */
+.book-wrap.open .book-cover{
+
+  transform: rotateY(-140deg);
+  box-shadow: 10px 30px 70px rgba(0,0,0,.35);
+  opacity: 0;
+  pointer-events: none; /* ✅ IMPORTANT: ne bloque plus les inputs */
+
+}
+
+/* Petit effet au survol quand fermé */
+.book-wrap.closed:hover .book-cover{
+  transform: rotateY(-12deg);
+}
+
+/* ===== FIX INPUT NOT CLICKABLE ===== */
+
+/* Les pages doivent être au-dessus et cliquables */
+.book-pages {
+  position: relative;
+  z-index: 50;
+  pointer-events: auto;
+}
+
+/* Tout ce qui est dans les pages doit accepter le focus/clic */
+.book-pages * {
+  pointer-events: auto;
+}
+
+/* La couverture ne doit JAMAIS bloquer en mode ouvert */
+.book-wrap.open .book-cover {
+  pointer-events: none !important;
+  opacity: 0 !important;
+  z-index: 0 !important;
+}
+
+/* IMPORTANT : la scène ne doit pas capturer les clics quand ouvert */
+.book-wrap.open {
+  pointer-events: auto;
+}
+
+/* Scene 3D */
+.book-scene{
+  perspective: 1400px;
+  user-select: none;
+}
+
+/* Wrap */
+.book-wrap{
+  position: relative;
+  width: min(880px, 95vw);
+  height: min(520px, 70vh);
+  transform-style: preserve-3d;
+}
+
+/* Pages AU-DESSUS et cliquables */
+.book-pages{
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: #f7f0e3;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0,0,0,.35);
+
+  z-index: 50;            /* ✅ au-dessus */
+  pointer-events: auto;   /* ✅ clique ok */
+}
+.book-pages *{
+  pointer-events: auto;   /* ✅ inputs ok */
+}
+
+/* Couverture */
+.book-cover{
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #7a4a18, #3b240d);
+  box-shadow: 0 30px 60px rgba(0,0,0,.45);
+  transform-origin: left center;
+  transition: transform 900ms cubic-bezier(.2,.8,.2,1), opacity 900ms;
+
+  z-index: 60;            /* ✅ au-dessus quand fermé */
+  cursor: pointer;
+}
+
+/* Fermé */
+.book-wrap.closed .book-cover{
+  transform: rotateY(0deg) translateZ(2px);
+  opacity: 1;
+}
+.book-wrap.closed .book-pages{
+  filter: blur(1px);
+  opacity: .25;
+}
+
+/* Ouvert : couverture ne bloque JAMAIS */
+.book-wrap.open .book-cover{
+  transform: rotateY(-140deg);
+  opacity: 0;
+  pointer-events: none;   /* ✅ clé du problème */
+  z-index: 0;
+}
+.book-wrap.open .book-pages{
+  filter: none;
+  opacity: 1;
+}
+
+/* pages layout */
+.pages-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+}
+.page{ padding: 42px; }
+.page.left{ border-right: 1px solid rgba(0,0,0,.08); }
+
+.spine{
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 100%;
+  background: #d7c3a1;
+  box-shadow: inset 0 0 8px rgba(0,0,0,.2);
+}
+/* ===== FIX: inputs non cliquables ===== */
+
+/* Crée un contexte de z-index propre */
+.book-wrap{
+  isolation: isolate;
+}
+
+/* Pages toujours au-dessus et interactives */
+.book-pages{
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: auto;
+}
+.book-pages *{
+  pointer-events: auto;
+}
+
+/* Par défaut, la couverture NE CAPTE PAS les clics */
+.book-cover{
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none; /* ✅ très important */
+}
+
+/* Quand le livre est fermé, la couverture devient cliquable */
+.book-wrap.closed .book-cover{
+  pointer-events: auto; /* ✅ seule situation où on autorise le clic */
+}
+
+/* Quand ouvert, couverture = jamais cliquable */
+.book-wrap.open .book-cover{
+  pointer-events: none !important;
+  opacity: 0 !important;
+  z-index: 0 !important;
+}
